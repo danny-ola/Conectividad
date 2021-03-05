@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="view_account_move_reversal_form_inherit" model="ir.ui.view">
+            <field name="name">account.move.reversal.form.inherit</field>
+            <field name="model">account.move.reversal</field>
+            <field name="inherit_id" ref="account.view_account_move_reversal"/>
+             <field name="arch" type="xml">
+                <xpath expr="//field[@name='reason']" position="attributes">
+                    <attribute name="required">1</attribute>
+                </xpath>
+
+                 <field name="reason" position="before">
+                    <field name="reference_code_id" string="Código Referencia" attrs="{'required': [('move_type','=','out_invoice')], 'invisible': [('move_type','!=','out_invoice')]}"/>
+                    <field name="reference_document_id" string="Tipo de documento a crear" invisible="1"/>
+                </field>
+            </field>
+        </record>
+    </data>
+</odoo>

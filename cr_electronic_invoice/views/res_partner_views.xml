@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<odoo>
+    <data>
+        <record id="view_res_partner_inherit" 
+            model="ir.ui.view">
+            <field name="name">res.partner.form.inherit</field>
+            <field name="model">res.partner</field>
+            <field name="type">form</field>
+            <field name="inherit_id" ref="base.view_partner_form"/>
+            <field name="arch" type="xml">
+                <data>
+                     <field name="property_payment_term_id" 
+                        position="after">
+                        <field name="payment_methods_id" 
+                            groups="account.group_account_invoice"/>
+                    </field>
+
+                    <field name="vat" position="after">
+                        <field name="identification_id" string="Tipo de identificación"/>
+                        <field name="supplier_rank" invisible="1" readonly="1"/>
+                        <separator />
+                        <button name="action_get_economic_activities" type="object" string="Consultar nombre y actividades en MH" attrs="{'invisible': [('vat', 'in', (False, ''))]}"/>
+                    </field>
+                    <field name="website" position="before">
+                        <field name="correos_ids" mode="tree" widget="one2many">
+                            <tree editable="bottom">
+                                <field name="name" required="1" widget="email"/>
+                            </tree>
+                        </field>
+                    </field>
+
+
+                    <field name="category_id" position="after">
+                        
+                        <field name="has_exoneration" attrs1="{'invisible': [('supplier_rank', '>', 0)]}" />
+                        <field name="export" attrs1="{'invisible': [('supplier_rank', '>', 0)]}"  invisible="0"/>
+                    </field>
+                </data>
+                <xpath expr="//page[3]" position="after">
+                    <page name="exoneration_config" string="Exoneration" attrs="{'invisible': [('has_exoneration', '!=', True)]}">
+                        <group col="2">
+                            <field name="exoneration_number"/>
+                            <field name="type_exoneration"/>
+                            <field name="institution_name"/>
+                            <field name="date_issue"/>
+                            <field name="date_expiration"/>
+                        </group>
+                    </page>
+                </xpath>
+            </field>
+        </record>
+
+
+
+        <record id="view_res_partner_inherit_account"
+            model="ir.ui.view">
+            <field name="name">res.partner.form.inherit</field>
+            <field name="model">res.partner</field>
+            <field name="type">form</field>
+            <field name="inherit_id" ref="account.view_partner_property_form"/>
+            <field name="arch" type="xml">
+                    <field name="property_account_position_id" position="after">
+
+                        <field name="activity_id" domain="[('id', 'in', economic_activities_ids)]" options="{&quot;no_create&quot;: True, &quot;active_test&quot;: False}"/>
+                        <field name="economic_activities_ids" readonly="0"  widget="many2many_tags" mode="tree"/>
+                    </field>
+
+            </field>
+        </record>
+
+
+
+    </data>
+</odoo>

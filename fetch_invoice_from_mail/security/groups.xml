@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="campos_facturacion_electronica" model="res.groups">
+        <field name="name">Permiso a campos especiales de facturación</field>
+    </record>
+
+    <record id="campos_facturacion_electronica" model="res.groups">
+        <field name="users" eval="[(4, ref('base.user_root'))]"/>
+    </record>
+
+</odoo>
