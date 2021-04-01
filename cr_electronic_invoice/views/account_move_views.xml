@@ -1,0 +1,211 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="view_move_form_inherit" model="ir.ui.view">
+            <field name="name">account.move.form.inherit</field>
+            <field name="model">account.move</field>
+            <field name="inherit_id" ref="account.view_move_form"/>
+            <field name="arch" type="xml">
+
+                <xpath expr="//button[@name='button_draft']" position="attributes">
+                    <attribute name="attrs">{'invisible' : [('type', 'in', ('out_invoice', 'out_refund'))]}</attribute>
+                </xpath>
+
+                <button name="button_draft" position="after">
+                    <button name="action_debit_note" type="object" string="Agregar Nota de débito"  attrs="{'invisible':[('type','!=', 'out_refund')]}"/>
+                </button>
+
+
+                <!--xpath expr="//button[@name='action_reverse']" position="attributes">
+                    <attribute name="attrs">{'invisible': ['|', ('type', 'not in', ('out_invoice')), ('state', '!=', 'posted')]}</attribute>
+                </xpath-->
+                <!--attribute name="attrs">{'invisible': ['|', ('type', 'not in', ('out_invoice', 'out_refund')), ('state', '!=', 'posted')]}</attribute-->
+
+                <xpath expr="//h1[@class='mt0']" position="after">
+                    <field name="number_electronic" readonly="1"/>
+                    <field name="tipo_documento" invisible="1"/>
+                </xpath>
+                <xpath expr="//button[@name='button_cancel']" position="attributes">
+                    <attribute name="attrs">{'invisible' : [('state_tributacion', 'not in', ('rechazado','error'))]}</attribute>
+
+                </xpath>
+                <xpath expr="//field[@name='invoice_sequence_number_next']" position="attributes">
+                    <attribute name="invisible">1</attribute>
+                </xpath>
+
+                <xpath expr="//field[@name='name']" position="after">
+                    <label for="name" style="color:green;font-size: 20px;float:right;border: 1px solid green;padding:5px" string="Aceptada" attrs="{'invisible':[('state_tributacion','!=','aceptado')]}"/>
+                    <label for="name" style="color:orange;font-size: 20px;float:right;border: 1px solid orange;padding:5px" string="Rechazada" attrs="{'invisible':[('state_tributacion','!=','rechazado')]}"/>
+                    <label for="name" style="color:blue;font-size: 20px;float:right;border: 1px solid blue;padding:5px" string="Esperando envio" attrs="{'invisible':[('state_tributacion','!=','esperando')]}"/>
+                    <label for="name" style="color:#006699;font-size: 20px;float:right;border: 1px solid #006699;padding:5px" string="Enviado" attrs="{'invisible':[('state_tributacion','!=','enviado')]}"/>
+                    <label for="name" style="color:#006699;font-size: 20px;float:right;border: 1px solid #006699;padding:5px" string="Procesando" attrs="{'invisible':[('state_tributacion','!=','procesando')]}"/>
+                    <label for="name" style="color:#006699;font-size: 20px;float:right;border: 1px solid #006699;padding:5px" string="Recibido" attrs="{'invisible':[('state_tributacion','!=','recibido')]}"/>
+                    <label for="name" style="color:red;font-size: 20px;float:right;border: 1px solid red;padding:5px" string="Error" attrs="{'invisible':[('state_tributacion','not in',('enviado_error','conexion_error', 'error', 'consultar_error'))]}"/>
+                    <label for="name" style="color:green;font-size: 20px;float:right;border: 1px solid green;padding:5px" string="Borrador" attrs="{'invisible':[('state','not in',('draft'))]}"/>
+
+                    <label for="name" style="color:green;font-size: 20px;float:right;border: 1px solid green;padding:5px" string="Nota de Débito" attrs="{'invisible':[('tipo_documento','!=','ND')]}"/>
+                    <label for="name" style="color:green;font-size: 20px;float:right;border: 1px solid green;padding:5px" string="Nota de Crédito" attrs="{'invisible':[('tipo_documento','!=','NC')]}"/>
+                    <label for="name" style="color:green;font-size: 20px;float:right;border: 1px solid green;padding:5px" string="Factura Electrónica" attrs="{'invisible':[('tipo_documento','!=','FE')]}"/>
+                    <label for="name" style="color:green;font-size: 20px;float:right;border: 1px solid green;padding:5px" string="Factura de Exportación" attrs="{'invisible':[('tipo_documento','!=','FEE')]}"/>
+                    <label for="name" style="color:green;font-size: 20px;float:right;border: 1px solid green;padding:5px" string="Tiquete Electrónico" attrs="{'invisible':[('tipo_documento','!=','TE')]}"/>
+                    <label for="name" style="color:green;font-size: 20px;float:right;border: 1px solid green;padding:5px" string="Factura de Compra" attrs="{'invisible':[('tipo_documento','!=','FEC')]}"/>
+
+                </xpath>
+
+                <xpath expr="//button[@name='button_draft']" position="after">
+                    <button name="action_check_hacienda" type="object" string="Consultar Hacienda"
+                            attrs="{'invisible':[('state_tributacion','=', False)]}"/>
+                    <button name="action_send_mrs_to_hacienda" type="object" string="Enviar Mensaje Receptor"
+                            attrs="{'invisible':['|', '|', ('type','in', ('out_invoice', 'out_refund')), ('tipo_documento','==','FEC'),('state_tributacion','!=', False), ('state_tributacion','!=','rechazado'),('state_tributacion','!=','error')]}"/>
+                    <button name="action_create_fec" type="object" string="Enviar FEC"
+                            attrs="{'invisible':['|', ('tipo_documento','!=','FEC'), ('state_tributacion','not in', (False,'rechazado', 'error'))]}"/>
+                </xpath>
+
+                <field name="narration" position="before">
+                    <field name="invoice_amount_text"/>
+                </field>
+                <field name="partner_id" position="attributes">
+                    <attribute name="attrs">{'required': [("type","in", ("in_invoice", "in_refund", "out_invoice", "out_refund"))]}</attribute>
+                </field>
+                <field name="partner_id" position="after">
+                    <field name="economic_activities_ids" invisible="1" readonly="1" options='{"active_test": [("type","in", ("in_invoice", "in_refund"))]}'/>
+                    <field name="economic_activity_id" attrs="{'required':['|', ('type','in', ('out_invoice', 'out_refund')), ('tipo_documento','=', 'FEC')], 'readonly': [('state','!=','draft')]}" domain="[('id', 'in', economic_activities_ids),]"
+                           options='{"no_open": True, "no_create": True, "active_test": [("type","in", ("in_invoice", "in_refund"))]}'/>
+                    <field name="sequence" invisible="1"/>
+                </field>
+
+                <field name="invoice_date" position="attributes">
+                    <attribute name="attrs">{'readonly': [('type', 'in', ('out_invoice', 'out_refund'))], 'required': [('type', 'in', ('in_invoice', 'in_refund') )]}</attribute>
+                </field>
+
+                <field name="invoice_date" position="after">
+                    <field name="date_issuance" readonly="0" attrs="{'invisible': [('date_issuance','=', False)]}"/>
+                    <field name="tipo_documento"  attrs="{'readonly':[('state','!=','draft')],
+                    'required': [('type', 'in', ('out_invoice', 'out_refund', 'in_invoice', 'in_refund'))]}"/>
+
+                    <field name="payment_methods_id" attrs="{'readonly':[('state','!=','draft')], 'invisible': [('type', 'not in', ('out_invoice', 'out_refund'))],
+                     'required': [('type', 'in', ('out_invoice', 'out_refund'))]}"/>
+
+                    <field name="payment_methods_id" attrs="{'readonly':[('state','!=','draft')], 'invisible': [('tipo_documento', '!=', 'FEC')],
+                                 'required': [('tipo_documento', '=', 'FEC')]}"/>
+
+                     <field name="xml_vat" attrs="{'invisible': [('type', 'in', ('out_invoice','out_refund','entry'))]}"/>
+                </field>
+
+                <xpath expr="//field[@name='invoice_line_ids']//tree//field[@name='name']" position="after">
+                    <field name="categ_name" invisible="1" readonly="1"/>
+                    <field name="product_code" invisible="1" readonly="1"/>
+                    <!--field name="third_party_id" attrs="{'invisible':[('product_code', '!=', '04')]}"/-->
+                </xpath>
+                <!--BRYAN-->
+                <!--xpath expr="//field[@name='invoice_line_ids']//tree//field[@name='discount']" position="after">
+                    <field name="discount_note"/>
+                </xpath-->
+                <xpath expr="//field[@name='invoice_line_ids']//tree//field[@name='tax_ids']" position="attributes">
+                    <attribute name="required">1</attribute>
+                </xpath>
+
+                <xpath expr="//button[@name='action_invoice_sent']" position="attributes">
+                    <attribute name="invisible">False</attribute>
+                </xpath>
+
+                <xpath expr="(//field[@name='amount_total'])[last()]" position="after">
+                    <field name="amount_tax_electronic_invoice" attrs="{'invisible':[('type','not in', ('in_invoice', 'in_refund'))]}"/>
+                    <field name="amount_total_electronic_invoice" attrs="{'invisible':[('type','not in', ('in_invoice', 'in_refund'))]}"/>
+                </xpath>
+
+                <xpath expr="//page[2]" position="after">
+                    <page name="fe_invoice_data" string="Información Electrónica" attrs="{'invisible':[('type','not in', ('out_invoice', 'out_refund', 'in_invoice', 'in_refund'))]}">
+                        <group id="fe_tab_group" col="2" >
+                            <group string="Aceptación Electrónica" name="fe_in_info_group" colspan="2" col="5" attrs="{'invisible': [('type','in', ('out_invoice', 'out_refund'))]}">
+
+                                <field name="fname_xml_supplier_approval" invisible="1" colspan="5" />
+                                <field name="xml_supplier_approval" filename="fname_xml_supplier_approval" colspan="4"
+                                   attrs="{'invisible':['|', ('tipo_documento','=', 'FEC'), ('type','in', ('out_invoice', 'out_refund'))],
+                                   'required': [('tipo_documento', 'in', ('CCE', 'CPCE', 'RCE') )]}"/>
+                                <!--button name="load_xml_data" type="object" string="Cargar datos del XML" colspan="1"
+                                    attrs="{'invisible':['|', '|', '|', ('xml_supplier_approval', '=', False), ('type','in', ('out_invoice', 'out_refund')), ('tipo_documento','=', 'FEC'), ('state','!=','draft')]}"/-->
+                                <field name="state_invoice_partner" invisible="1"/>
+                            </group>
+                            <group string="Referencia Electrónica" name="eref_info_group" colspan="2" attrs="{'invisible':[('xml_comprobante','=',False)]}">
+                                <field name="fname_xml_comprobante" invisible="1" readonly="1"/>
+                                <field name="xml_comprobante" filename="fname_xml_comprobante" readonly="1"/>
+                                <field name="fname_xml_respuesta_tributacion" invisible="1" readonly="1"/>
+                                <field name="xml_respuesta_tributacion" filename="fname_xml_respuesta_tributacion" readonly="1"/>
+                                <field name="state_tributacion" readonly="1"/>
+                                <field name="reference_code_id" attrs="{'readonly':[('state','!=','draft')], 'invisible': [('reference_code_id','=',False)]}" />
+<!--                                <field name="reference_document_id" attrs="{'readonly':[('state','!=','draft')], 'invisible': [('reference_document_id','=',False)]}"/>-->
+                                <field name="invoice_id" domain="[('number_electronic', '!=', False)]" attrs="{'readonly':[('state','!=','draft')], 'invisible': [('invoice_id','=',False)]}"/>
+                            </group>
+                            <group string="Documentos de referencia">
+                            <field name="reference_document_ids" nolabel="1" widget="one2many_list" attrs="{'readonly':[('state','!=','draft')]}">
+                                <tree editable="bottom">
+                                    <field name="invoice_id" domain="[('partner_id', '=', parent.partner_id), ('state', '!=', 'draft'), ('type', 'in', ('out_invoice', 'out_refund', 'in_invoice'))]" attrs="{'required':[('external_document_id','=', False)]}" options="{'no_create': True, 'no_edit': True}"/>
+                                    <field name="type_reference_document_id" required="1" options="{'no_create': True, 'no_open': True}" force_save="1"/>
+                                    <field name="reference_code_id" required="1" options="{'no_create': True, 'no_open': True}"/>
+                                    <field name="reference_reason"/>
+                                    <field name="external_document_id" domain="[('is_validate', '!=', False)]" attrs="{'required':[('invoice_id','=', False)]}" optional="hide"/>
+                                </tree>
+                            </field>
+                            </group>
+                            
+                        </group>
+                    </page>
+                </xpath>
+            </field>
+        </record>
+
+        <record id="view_move_tree_inherit" model="ir.ui.view">
+            <field name="name">account.invoice.tree.inherit</field>
+            <field name="model">account.move</field>
+            <field name="inherit_id" ref="account.view_invoice_tree"/>
+            <field name="arch" type="xml">
+                <tree position="attributes">
+                    <attribute name="decoration-danger">
+                        state_tributacion == 'rechazado'
+                    </attribute>
+                </tree>
+                <field name="state" position="before">
+                    <field name="tipo_documento" string="Doc Elect."/>
+                    <field name="sequence" string="Consecutivo"/>
+                    <field name="type" invisible="1" readonly="1"/>
+                    <field name="state_tributacion" string="Estado FE" />
+                </field>
+            </field>
+        </record>
+
+<!-- 
+        <record id="view_account_move_reverse_inherit" model="ir.ui.view">
+            <field name="name">account.move.reverse.form.inherit</field>
+            <field name="model">account.move.reverse</field>
+            <field name="inherit_id" ref="account.view_account_invoice_refund"/>
+            <field name="arch" type="xml">
+                <field name="description" position="after">
+                    <field name="reference_code_id"/>
+                    <field name="reference_document_id"/>
+                    <field name="invoice_id" readonly="1"/>
+                </field>
+            </field>
+        </record> -->
+
+        <record id="view_tax_form_inherit" model="ir.ui.view">
+            <field name="name">account.tax.form.inherit</field>
+            <field name="model">account.tax</field>
+            <field name="inherit_id" ref="account.view_tax_form"/>
+            <field name="arch" type="xml">
+                <field name="name" position="after">
+                    <field name="tax_code"/>
+                </field>
+            </field>
+        </record>
+
+        <record id="view_account_invoice_filter" model="ir.ui.view">
+            <field name="name">account.invoice.select.inherited</field>
+            <field name="model">account.move</field>
+            <field name="inherit_id" ref="account.view_account_invoice_filter"/>
+            <field name="arch" type="xml">
+                <field name="name" string="Invoice" filter_domain="['|', '|', '|' , '|', '|', ('name', 'ilike', self), ('invoice_origin', 'ilike', self), ('ref', 'ilike', self), ('invoice_payment_ref', 'ilike', self), ('partner_id', 'child_of', self), ('reference', 'ilike', self)]"/>
+            </field>
+        </record>
+    </data>
+</odoo>

@@ -1,0 +1,93 @@
+<odoo>
+    <data>
+        <template id="report_invoice_inherit_demo" inherit_id="account.report_invoice_document">
+            <xpath expr="//div[@class='page']/h2" position="after">
+                Clave electronica:
+                <small t-esc="o.number_electronic"/>
+                <!--  img  t-if="o.number_electronic" t-att-src="'/report/barcode/QR/%s' % o.clave_envio_hacienda" height="200" width="200"/  -->
+            </xpath>
+            <xpath expr="//t[@t-set='address']" position="replace">
+                <div class="row">
+                    <div class="col-12 text-left">
+                        <span t-esc="o.partner_id.name"/>
+                        <t t-if="o.partner_id.vat" class="mt16">
+                            <br/>
+                            <span t-if="o.company_id.country_id.vat_label" t-esc="o.company_id.country_id.vat_label"/>
+                            <t t-else="">Tax ID</t>
+                            :
+                            <span t-field="o.partner_id.vat"/>
+                        </t>
+                        <t t-if="o.partner_id.formatear_direccion()">
+                            <br/>
+                            <span t-esc="o.partner_id.formatear_direccion()"/>
+                        </t>
+                        <t t-if="o.partner_id.email">
+                            <br/>
+                            Correo:
+                            <a t-att-href="'mailto:' + o.partner_id.email">
+                                <span t-esc="o.partner_id.email"/>
+                            </a>
+                        </t>
+                        <t t-if="o.partner_id.phone">
+                            <br/>
+                            Tel:
+                            <a t-att-href="'tel:' + o.partner_id.phone">
+                                <span t-esc="o.partner_id.phone"/>
+                            </a>
+                        </t>
+                    </div>
+                </div>
+            </xpath>
+            <xpath expr="//div[@class='page']" position="inside">
+                <p>
+                    <p t-if="o.currency_id.id not in (39,39)">
+                        <strong>
+                            <span t-field="o.amount_in_colon_bills_total"/>
+                        </strong>
+                    </p>
+                </p>
+                <p>
+                    <h6>
+                        <strong>CUENTAS BANCARIAS</strong>
+                    </h6>
+                    <small>
+                        <strong>BAC COLONES:</strong>
+                    </small>
+                    <small>CR28010200009072412443/</small>
+                    <small>
+                        <strong>BAC DOLARES:</strong>
+                    </small>
+                    <small>CR70010200009072412851</small>
+                    <br/>
+                    <small>
+                        <strong>SCOTIABANK COLONES:</strong>
+                    </small>
+                    <small>CR90012300130000086004/</small>
+                    <small>
+                        <strong>SCOTIABANK DOLARES:</strong>
+                    </small>
+                    <small>CR25012300130000086010</small>
+                </p>
+                <p t-if="o.type in ('out_invoice', 'out_refund')">
+                    <!--                      <small> <strong>DESPUES DE 8 DIAS NATURALES NO SE ACEPTAN DEVOLUCIONES. Acepto que recibo la mercadería en perfecto estado.</strong></small>  -->
+                    <br/>
+                    <small>Emitida conforme lo establecido en la resolución de Facturación Electrónica, Nº
+                        DGT-R-033-2019 veinte de junio de dos mil diecinueve de la Dirección General de
+                        Tributación.</small>
+                    <small>Versión: 4.3</small>
+                    <!--  t t-if="o.state == 'posted'">
+                                            <br/>
+                                            <img t-att-src="'/report/barcode/QR/%s' % o.get_qr_url()" height="200" width="200"/>
+                                        </t  -->
+                </p>
+            </xpath>
+            <xpath expr="//h2/span[1]" position="replace">
+                <span t-if="o.type == 'out_invoice' and o.state == 'posted' and o.tipo_documento"
+                      t-esc="dict(o.with_context({'from_print': 1}).get_tipos_documento())[o.tipo_documento]"/>
+            </xpath>
+            <xpath expr="//h2/span[4]" position="replace">
+                <span t-if="o.type == 'out_refund'">Nota de Crédito</span>
+            </xpath>
+        </template>
+    </data>
+</odoo>

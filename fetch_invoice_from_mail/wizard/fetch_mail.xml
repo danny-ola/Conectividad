@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+	<data>
+
+		<record id="fetch_mail_zip_form" model="ir.ui.view">
+			<field name="name">fetch.mail.zip.form</field>
+			<field name="model">fetch.mail.zip</field>
+			<field name="arch" type="xml">
+                <form string="Formulario">
+                    <group>
+                        <group>
+                            <field name="host_imap_server_fe"/>
+                            <field name="port_imap_server_fe"/>
+                            <field name="user_imap_server_fe"/>
+                            <field name="pass_imap_server_fe"/>
+                        </group>
+                        <group>
+                            <field name="filter_by"/>
+                            <field name="date_from" attrs="{'required': [('filter_by', '=', 'date')], 'invisible': [('filter_by', '!=', 'date')]}"/>
+                            <field name="date_to" attrs="{'invisible': [('filter_by', '!=', 'date')]}"/>
+                        </group>
+                        <group>
+                            <field name="fname_archivo" invisible="1"/>
+                            <field name="archivo" filename="fname_archivo" readonly="1" attrs="{'invisible': [('archivo', '=', False)]}"/>
+                        </group>
+                    </group>
+                    <footer>
+                        <button string="Generar archivos" name="generate_zip" type="object" default_focus="1"  class="btn-primary"/>
+                        <button string="Cancel" class="btn-default" special="cancel"/>
+                    </footer>
+
+                </form>
+			</field>
+		</record>
+
+        <record id="fetch_mail_zip_form_action" model="ir.actions.act_window">
+            <field name="name">Archivos desde correo</field>
+            <field name="res_model">fetch.mail.zip</field>
+            <field name="view_mode">form</field>
+            <field name="target">new</field>
+        </record>
+
+        <menuitem action="fetch_mail_zip_form_action" id="menu_fetch_mail_zip_form_action" parent="account.menu_finance_payables" sequence="10" groups="base.group_no_one" />
+
+
+	</data>
+</odoo>
