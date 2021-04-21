@@ -256,7 +256,10 @@ class ParseXML(models.TransientModel):
                 impuesto = l.find('Impuesto')
                 if impuesto is not None:
                     tarifa_impuesto = int(float(impuesto.find('Tarifa').text))
-                    codigo_impuesto = self.search_data('account_tax', str(tarifa_impuesto), 'name', company_id)
+                    codigo_tarifa= str(impuesto.find('CodigoTarifa').text)
+                    codigo_impuesto = self.env['account.tax'].search([('iva_tax_code','=',codigo_tarifa),('type_tax_use', '=', 'purchase'), ('company_id', '=', company_id)], limit=1).id
+
+                        # self.search_data('account_tax', str(tarifa_impuesto), 'name', company_id)
                     if codigo_impuesto:
                         #linea.update({'invoice_line_tax_ids': [[4, codigo_impuesto]]})
                         linea.update({'tax_ids': [(6, 0, [codigo_impuesto])]})
