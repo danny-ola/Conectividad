@@ -34,3 +34,4 @@ class ResConfigSettings(models.TransientModel):
         set_param('bccr_token', self.bccr_token)
         set_param('exchange_source', self.exchange_source)
 
+

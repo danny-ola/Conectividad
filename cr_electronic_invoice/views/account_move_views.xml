@@ -88,6 +88,8 @@
 
                     <field name="payment_methods_id" attrs="{'readonly':[('state','!=','draft')], 'invisible': [('tipo_documento', '!=', 'FEC')],
                                  'required': [('tipo_documento', '=', 'FEC')]}"/>
+
+                     <field name="xml_vat" attrs="{'invisible': [('type', 'in', ('out_invoice','out_refund','entry'))]}"/>
                 </field>
 
                 <xpath expr="//field[@name='invoice_line_ids']//tree//field[@name='name']" position="after">

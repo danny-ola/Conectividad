@@ -300,6 +300,7 @@ class AccountInvoiceElectronic(models.Model):
         string='Total de impuestos FE', readonly=False, )
     amount_total_electronic_invoice = fields.Monetary(
         string='Total FE', readonly=False, )
+    xml_vat = fields.Char(string="Identificación XML")
 
     tipo_documento = fields.Selection(
         selection=get_tipos_documento,
@@ -333,8 +334,6 @@ class AccountInvoiceElectronic(models.Model):
     _sql_constraints = [
         ('number_electronic_uniq', 'unique (company_id, number_electronic)',
          "La clave de comprobante debe ser única"),
-        # ('number_electronic_supplier_uniq', 'unique (partner_id, ref, type)',
-        #  "La clave de comprobante debe ser única"),
     ]
 
     def get_qr_url(self):
@@ -487,7 +486,6 @@ class AccountInvoiceElectronic(models.Model):
                     except Exception as e:
                         _logger.error('ERROR cuando intenta enviar correo: %s' % (e,))
                     self.date_invoice_sent = fields.Datetime.now()
-
     # @api.onchange('xml_supplier_approval')
     # def _onchange_xml_supplier_approval(self):
     #     if self.xml_supplier_approval:
@@ -685,10 +683,11 @@ class AccountInvoiceElectronic(models.Model):
                             anno = inv.number_electronic[7:9]  # str(now_cr.year)[2:4],
 
                             date_cr = now_cr.strftime("20" + anno + "-" + mes + "-" + dia + "T%H:%M:%S-06:00")
-
                             inv.date_issuance = date_cr
 
                             clave_xml = inv.search_clave_xml()
+                            if not inv.partner_id.vat:
+                                inv.partner_id.vat = inv.xml_vat
                             xml = api_facturae.gen_xml_mr_43(
                                 clave_xml,inv.partner_id.vat,
                                 inv.date_issuance,
@@ -1123,6 +1122,8 @@ class AccountInvoiceElectronic(models.Model):
                 total_impuestos = 0.0
                 base_subtotal = 0.0
                 for inv_line in inv.invoice_line_ids:
+                    if inv_line.display_type in ('line_note','line_section'):
+                        continue
                     # Revisamos si está línea es de Otros Cargos
                     if False: #inv_line.product_id and inv_line.product_id.id == self.env.ref('cr_electronic_invoice.product_iva_devuelto').id:
                         total_iva_devuelto = -inv_line.price_total
@@ -1429,7 +1430,7 @@ class AccountInvoiceElectronic(models.Model):
 
             if doc.type in ('out_invoice','out_refund'):
                 for l in doc.invoice_line_ids:
-                    if not l.product_id.cabys_code and not l.product_id.categ_id.cabys_code and not l.product_id.product_tmpl_id.cabys_code:
+                    if not l.product_id.cabys_code and not l.product_id.categ_id.cabys_code and not l.product_id.product_tmpl_id.cabys_code and not l.display_type in ('line_note', 'line_section'):
                         raise UserError('En la línea %s no se ha establecido código cabys' % l.name)
             if doc.type in ('out_invoice','out_refund'):
                 doc.invoice_date = (datetime.datetime.now() - datetime.timedelta(hours=6)).date()
@@ -1437,6 +1438,7 @@ class AccountInvoiceElectronic(models.Model):
                 doc.invoice_date = doc.date
 
             (tipo_documento, sequence) = doc.get_invoice_sequence()
+            doc.tipo_documento = tipo_documento
             if not sequence:
                 continue
             response_json = api_facturae.get_clave_hacienda(doc,
@@ -1713,7 +1715,6 @@ class AccountInvoiceElectronic(models.Model):
             # namespaces = factura.nsmap
             # inv_xmlns = namespaces.pop(None)
             # namespaces['inv'] = inv_xmlns
-
             self.tipo_documento = 'CCE'
 
 
@@ -1777,15 +1778,17 @@ class AccountInvoiceElectronic(models.Model):
             if FechaEmision:
                 r = parseFecha(FechaEmision[0].text)
                 values.update({'invoice_date': r, 'date': r,'date_issuance': FechaEmision[0].text})
+
                 PlazoCredito = buscar("PlazoCredito")
                 if PlazoCredito:
                     PlazoCredito = PlazoCredito[0].text
                     days = 0
-                    if len(PlazoCredito) > 1:
-                        if str(PlazoCredito[:2]).isdigit():
-                            days = int(PlazoCredito[:2])
-                        elif str(PlazoCredito[:1]).isdigit():
-                            days = int(PlazoCredito[:1])
+                    if PlazoCredito:
+                        if len(PlazoCredito) > 1:
+                            if str(PlazoCredito[:2]).isdigit():
+                                days = int(PlazoCredito[:2])
+                            elif str(PlazoCredito[:1]).isdigit():
+                                days = int(PlazoCredito[:1])
                     fecha_vencimiento = r + datetime.timedelta(days=days)
                     values.update({'invoice_date_due': fecha_vencimiento})
 
@@ -1807,7 +1810,8 @@ class AccountInvoiceElectronic(models.Model):
                 'economic_activity_id': idactividadp or False,
                 # 'activity_type': 2,
                 'amount_tax_electronic_invoice': amount_tax,
-                'amount_total_electronic_invoice': float(buscar("ResumenFactura/TotalComprobante")[0].text)
+                'amount_total_electronic_invoice': float(buscar("ResumenFactura/TotalComprobante")[0].text),
+                'xml_vat': str(partner[0].text)
             })
 
             detalleFactura = buscar("DetalleServicio/LineaDetalle")
@@ -1904,7 +1908,7 @@ class AccountInvoiceElectronic(models.Model):
         xml_decoded = base64.b64decode(self.xml_supplier_approval)
         try:
             parser = etree.XMLParser(ns_clean=True, recover=True, encoding='utf-8')
-            factura = etree.fromstring(re.sub(' xmlns=(\'|\")([a-zA-Z]|\:|\/|\.|\d|\-)*(\'|\")', '', xml_decoded.decode('utf-8'), count=1),parser)
+            factura = etree.fromstring((re.sub(' xmlns=(\'|\")([a-zA-Z]|\:|\/|\.|\d|\-)*(\'|\")', '',xml_decoded.decode('utf-8'), count=1)).encode('utf_8'), parser)
         except Exception as e:
             _logger.info(
                 'E-INV CR - This XML file is not XML-compliant.  Exception %s' % e)
