@@ -410,7 +410,8 @@ class AccountInvoiceElectronic(models.Model):
                     if attachment_resp:
                         attachment |= attachment_resp
                         for att in attachment:
-                            att.name = att.name + ".xml"
+                            if att.name[-4:] != ".xml":
+                                att.name = att.name + ".xml"
                         new_attachments = [a.copy({'res_model': 'mail.compose.message', 'res_id': 0, 'res_field': False}).id for a in attachment]
                         template.attachment_ids = [
                             (6, 0, new_attachments)]
