@@ -39,35 +39,6 @@
                 </div>
             </xpath>
             <xpath expr="//div[@class='page']" position="inside">
-                <p>
-                    <p t-if="o.currency_id.id not in (39,39)">
-                        <strong>
-                            <span t-field="o.amount_in_colon_bills_total"/>
-                        </strong>
-                    </p>
-                </p>
-                <p>
-                    <h6>
-                        <strong>CUENTAS BANCARIAS</strong>
-                    </h6>
-                    <small>
-                        <strong>BAC COLONES:</strong>
-                    </small>
-                    <small>CR28010200009072412443/</small>
-                    <small>
-                        <strong>BAC DOLARES:</strong>
-                    </small>
-                    <small>CR70010200009072412851</small>
-                    <br/>
-                    <small>
-                        <strong>SCOTIABANK COLONES:</strong>
-                    </small>
-                    <small>CR90012300130000086004/</small>
-                    <small>
-                        <strong>SCOTIABANK DOLARES:</strong>
-                    </small>
-                    <small>CR25012300130000086010</small>
-                </p>
                 <p t-if="o.type in ('out_invoice', 'out_refund')">
                     <!--                      <small> <strong>DESPUES DE 8 DIAS NATURALES NO SE ACEPTAN DEVOLUCIONES. Acepto que recibo la mercadería en perfecto estado.</strong></small>  -->
                     <br/>
