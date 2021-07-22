@@ -40,13 +40,6 @@
             </xpath>
             <xpath expr="//div[@class='page']" position="inside">
                 <p>
-                    <p t-if="o.currency_id.id not in (39,39)">
-                        <strong>
-                            <span t-field="o.amount_in_colon_bills_total"/>
-                        </strong>
-                    </p>
-                </p>
-                <p>
                     <h6>
                         <strong>CUENTAS BANCARIAS</strong>
                     </h6>
