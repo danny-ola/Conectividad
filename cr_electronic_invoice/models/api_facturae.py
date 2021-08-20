@@ -554,6 +554,7 @@ def gen_xml_v43(inv, sale_conditions, total_servicio_gravado,
 
                     if inv.tipo_documento != 'FEE':
                         if b.get('exoneracion'):
+                            porcentaje_exoneracion = b['exoneracion']['porcentajeCompra']
                             sb.Append('<Exoneracion>')
                             sb.Append('<TipoDocumento>' + receiver_company.type_exoneration.code + '</TipoDocumento>')
                             sb.Append('<NumeroDocumento>' + receiver_company.exoneration_number + '</NumeroDocumento>')
