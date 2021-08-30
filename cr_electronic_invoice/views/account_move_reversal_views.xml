@@ -6,8 +6,11 @@
             <field name="model">account.move.reversal</field>
             <field name="inherit_id" ref="account.view_account_move_reversal"/>
              <field name="arch" type="xml">
-                <xpath expr="//field[@name='reason']" position="attributes">
-                    <attribute name="required">1</attribute>
+<!--                <xpath expr="//field[@name='reason']" position="attributes">-->
+<!--                    <attribute name="required">1</attribute>-->
+<!--                </xpath>-->
+                 <xpath expr="//field[@name='reason']" position="attributes">
+                    <attribute name="attrs">{'invisible': [('move_type', '==', 'entry')], 'reason': [('move_type', '==', 'entry')], 'required': [('move_type', '!=', 'entry')]}</attribute>
                 </xpath>
 
                  <field name="reason" position="before">
