@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="account_payment_form_conectividad_view_inherit" model="ir.ui.view">
+        <field name="name">account.payment.form.conectividad.view.inherit</field>
+        <field name="model">account.payment</field>
+        <field name="inherit_id" ref="account.view_account_payment_form"/>
+        <field name="arch" type="xml">
+            <field name="partner_id" position="after">
+                <field name="dni_partner" attrs="{'invisible':[('payment_type', 'not in', ['inbound','outbound'])]}"/>
+                <field name="partner_banks" domains="[('partner_id','=','partner_id')]" attrs="{'invisible':[('payment_type', 'not in', ['inbound','outbound'])]}"/>
+            </field>
+        </field>
+    </record>
+</odoo>
