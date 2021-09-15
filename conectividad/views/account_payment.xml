@@ -8,6 +8,12 @@
             <field name="partner_id" position="after">
                 <field name="dni_partner" attrs="{'invisible':[('payment_type', 'not in', ['inbound','outbound'])]}"/>
                 <field name="partner_banks" domains="[('partner_id','=','partner_id')]" attrs="{'invisible':[('payment_type', 'not in', ['inbound','outbound'])]}"/>
+                <field name="banks_name" attrs="{'invisible':[('payment_type', 'not in', ['inbound','outbound'])]}"/>
+                <field name="abba" attrs="{'invisible':[('abba', '=', False)]}"/>
+                <field name="switf" attrs="{'invisible':[('abba', '=', False)]}"/>
+                <field name="destination_bank_name" attrs="{'invisible':[('abba', '=', False)]}"/>
+                <field name="middleware_bank_name" attrs="{'invisible':[('abba', '=', False)]}"/>
+                <field name="street" attrs="{'invisible':[('abba', '=', False)]}"/>
             </field>
         </field>
     </record>
