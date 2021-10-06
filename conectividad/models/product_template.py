@@ -12,8 +12,7 @@ class ProductTemplate(models.Model):
             vals['default_code'] = self.env['ir.sequence'].next_by_code('product.servicios') or '/'
         elif category == 'Licencias o Software':
             vals['default_code'] = self.env['ir.sequence'].next_by_code('product.licencias') or '/'
-        elif category.find('Todos') == -1 and category.find('Fletes') == -1 \
-            and category.find('Gastos') == -1 and category.find('Otros') == -1 :
+        else :
             vals['default_code'] = self.env['ir.sequence'].next_by_code('product.conectividad') or '/'
 
         return super(ProductTemplate, self).create(vals)
