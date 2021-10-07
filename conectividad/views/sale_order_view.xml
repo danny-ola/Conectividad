@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_order_form_inherit" model="ir.ui.view">
+        <field name="name">sale.order.form.inherit</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_form"/>
+        <field name="arch" type="xml">
+
+<!--            Campo para obtener las referencias internas y mostrar los datos en las tablas-->
+            <field name="order_line" position="before">
+                <field name="sale_description" class="oe_left"/>
+                <label for="sale_description" string="Referencias internas" class="oe_left"/>
+
+                <button name="search_file" type="object"  string="Importar" class="oe_highlight oe_left"/>
+            </field>
+<!--            Campo para obtener las referencias internas y mostrar los datos en las tablas-->
+            <tree  position="inside">
+                <field name="buy_price" optional="show" options='{"no_open": True}'
+                       attrs="{
+                        'readonly': [('state', 'in', ('sale','done', 'cancel'))],
+                        'required': [('display_type', '=', False)],
+                    }"/>
+                <field name="total_buy" optional="show" options='{"no_open": True}'
+                       attrs="{
+                        'required': [('display_type', '=', False)],
+                    }" />
+                <field name="operative_porcentage" optional="show" options='{"no_open": True}'
+                       attrs="{
+                        'readonly': [('state', 'in', ('sale','done', 'cancel'))],
+                        'required': [('display_type', '=', False)],
+                    }"/>
+                <field name="unit_cost" optional="show" options='{"no_open": True}'
+                       attrs="{
+                        'readonly': [('state', 'in', ('sale','done', 'cancel'))],
+                        'required': [('display_type', '=', False)],
+                    }"/>
+                <field name="sales_margin" optional="show" options='{"no_open": True}'
+                       attrs="{
+                        'readonly': [('state', 'in', ('sale','done', 'cancel'))],
+                        'required': [('display_type', '=', False)],
+                    }"/>
+                <field name="seller_id" optional="show" options='{"no_open": False}'
+                       domain="[('product_tmpl_id', '=',product_template_id)]"
+                       attrs="{
+                        'readonly': [('state', 'in', ('sale','done', 'cancel'))],
+                        'required': [('display_type', '=', False)],
+                        'invisible': [('seller_count','=',0 )],
+                    }"/>
+                <field name="product_template_id" invisible="1" />
+                <field name="seller_count"  invisible="1" />
+            </tree>
+
+        </field>
+    </record>
+</odoo>

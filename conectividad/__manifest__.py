@@ -8,11 +8,12 @@
     'maintainer': 'JackDevelopers',
     'company': 'JackDevelopers',
     'website': 'https://www.jackdevelopers.com',
-    'depends': ['stock', 'product','account'],
+    'depends': ['stock', 'product','account', 'sale'],
     'data': [
         'data/sequence.xml',
         'views/account_payment.xml',
         'views/res_bank.xml',
+        'views/sale_order_view.xml',
     ],
     'license': 'AGPL-3',
     'installable': True,

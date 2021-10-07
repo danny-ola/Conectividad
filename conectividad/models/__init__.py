@@ -3,3 +3,4 @@
 from . import product_template
 from . import account_payment
 from . import res_bank
+from . import sales_order
