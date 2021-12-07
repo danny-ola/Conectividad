@@ -19,6 +19,9 @@
                 <field name="company_account" attrs="{'invisible':[('payment_type', 'not in', ['inbound','outbound'])]}"/>
                 <field name="company_banks" attrs="{'invisible':[('payment_type', 'not in', ['inbound','outbound'])]}"/>
             </field>
+            <field name="amount" position="attributes">
+                <attribute name="options">{'format': 0}</attribute>
+            </field>
         </field>
     </record>
 </odoo>
