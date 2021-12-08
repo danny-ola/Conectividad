@@ -10,17 +10,31 @@
             <field name="order_line" position="before">
                 <field name="sale_description" class="oe_left"/>
                 <label for="sale_description" string="Referencias internas" class="oe_left"/>
-
                 <button name="search_file" type="object"  string="Importar" class="oe_highlight oe_left"/>
             </field>
 <!--            Campo para obtener las referencias internas y mostrar los datos en las tablas-->
-            <xpath expr="//tree/field[@name='product_uom_qty']" position="after">
+            <xpath expr="//field[@name='order_line']/tree//field[@name='product_id']" position="after">
+                <field name="seller_id" optional="hide" options='{"no_open": False}'
+                       domain="[('product_tmpl_id', '=',product_template_id)]"
+                       attrs="{
+                        'readonly': [('state', 'in', ('sale','done', 'cancel'))],
+                        'required': [('display_type', '=', False)],
+                        'invisible': [('seller_count','=',0 )],
+                    }"/>
+                <field name="seller_count"  invisible="1" />
+            </xpath>
+            <xpath expr="//field[@name='order_line']/tree//field[@name='product_uom_qty']" position="after">
+                <field name="discount_lead" optional="hide" options='{"no_open": True}'
+                       attrs="{
+                        'readonly': [('state', 'in', ('sale','done', 'cancel'))],
+                        'required': [('display_type', '=', False)],
+                    }"/>
                 <field name="buy_price" optional="show" options='{"no_open": True}'
                        attrs="{
                         'readonly': [('state', 'in', ('sale','done', 'cancel'))],
                         'required': [('display_type', '=', False)],
                     }"/>
-                <field name="total_buy" optional="show" options='{"no_open": True}'
+                <field name="total_buy" optional="show" force_save="1" options='{"no_open": True}'
                        attrs="{
                         'required': [('display_type', '=', False)],
                     }" />
@@ -29,9 +43,18 @@
                         'readonly': [('state', 'in', ('sale','done', 'cancel'))],
                         'required': [('display_type', '=', False)],
                     }"/>
+                <field name="operative_unit"  invisible="1" />
+                <field name="operative_total" optional="hide" force_save="1" options='{"no_open": True}'
+                       attrs="{
+                        'required': [('display_type', '=', False)],
+                    }"/>
                 <field name="unit_cost" optional="show" options='{"no_open": True}'
                        attrs="{
                         'readonly': [('state', 'in', ('sale','done', 'cancel'))],
+                        'required': [('display_type', '=', False)],
+                    }"/>
+                <field name="total_cost" optional="hide" force_save="1" options='{"no_open": True}'
+                       attrs="{
                         'required': [('display_type', '=', False)],
                     }"/>
                 <field name="sales_margin" optional="show" options='{"no_open": True}'
@@ -39,14 +62,6 @@
                         'readonly': [('state', 'in', ('sale','done', 'cancel'))],
                         'required': [('display_type', '=', False)],
                     }"/>
-                <field name="seller_id" optional="show" options='{"no_open": False}'
-                       domain="[('product_tmpl_id', '=',product_template_id)]"
-                       attrs="{
-                        'readonly': [('state', 'in', ('sale','done', 'cancel'))],
-                        'required': [('display_type', '=', False)],
-                        'invisible': [('seller_count','=',0 )],
-                    }"/>
-                <field name="seller_count"  invisible="1" />
             </xpath>
         </field>
     </record>

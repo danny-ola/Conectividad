@@ -40,29 +40,34 @@ class SaleOrderImport(models.Model):
 class NewFieldsProducts(models.Model):
     _inherit = 'sale.order.line'
 
+    discount_lead = fields.Integer(string='Descuento Oportunidad')
     buy_price = fields.Float(string='Precio compra')
-    total_buy = fields.Float(string='Compra total', readonly=True)
+    total_buy = fields.Float(string='Compra total', readonly=True, store=True)
     operative_porcentage = fields.Integer(string='% operativo')
+    operative_unit = fields.Float(string='Operativo Unidad', readonly=True, store=True)
+    operative_total = fields.Float(string='Operativo total', readonly=True, store=True)
     unit_cost = fields.Float(string='Costo unitario')
+    total_cost = fields.Float(string='Costo Total', readonly=True, store=True)
     sales_margin = fields.Float(string='Margen ventas')
     seller_id = fields.Many2one("product.supplierinfo", string="Proveedores", required=False)
     seller_count = fields.Integer(string="Number of vendor", compute='get_seller_count',
                                   help="Number of vendor prices for this product")
 
-    @api.onchange("buy_price","product_uom_qty")
-    def _compute_total_buy(self):
-        for record in self:
-            record.total_buy = record.buy_price * record.product_uom_qty
 
-    @api.onchange("operative_porcentage")
+    @api.onchange("buy_price","product_uom_qty","operative_porcentage","sales_margin","unit_cost")
     def _compute_operative(self):
         for record in self:
-            record.unit_cost = ((record.operative_porcentage/100)*record.buy_price)+record.buy_price
-
-    @api.onchange("sales_margin","unit_cost")
-    def _compute_sales_margin(self):
-        for record in self:
-            record.price_unit = ((record.sales_margin/100)*record.unit_cost)+record.unit_cost
+            if record.buy_price > 0:
+                record.total_buy = record.buy_price * record.product_uom_qty
+                if  record.unit_cost <=0 :
+                    record.unit_cost = record.buy_price
+            record.operative_unit = record.unit_cost-record.buy_price
+            if record.operative_porcentage > 0:
+                record.unit_cost = ((record.operative_porcentage/100)*record.buy_price)+record.buy_price
+                record.operative_total =  record.operative_unit*record.product_uom_qty
+            record.total_cost = record.unit_cost*record.product_uom_qty
+            if record.sales_margin > 0:
+                record.price_unit = ((record.sales_margin/100)*record.unit_cost)+record.unit_cost
 
     @api.onchange('product_id')
     def onchange_saller_id(self):
