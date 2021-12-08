@@ -14,7 +14,7 @@
                 <button name="search_file" type="object"  string="Importar" class="oe_highlight oe_left"/>
             </field>
 <!--            Campo para obtener las referencias internas y mostrar los datos en las tablas-->
-            <xpath expr="//tree[@name='order_line']/field[@name='product_uom_qty']" position="after">
+            <xpath expr="//tree/field[@name='product_uom_qty']" position="after">
                 <field name="buy_price" optional="show" options='{"no_open": True}'
                        attrs="{
                         'readonly': [('state', 'in', ('sale','done', 'cancel'))],
