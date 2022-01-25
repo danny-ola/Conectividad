@@ -449,7 +449,65 @@ class AccountInvoiceElectronic(models.Model):
             'target': 'new',
             'context': ctx,
         }
+    
+        def sent_email_cron(self, limit=5):
+        invoices = self.search(
+            [('invoice_date', '>', '2020-06-11'), ('state_tributacion', '=', 'aceptado'), ('date_invoice_sent', '=', False), ('type', 'in', ('out_invoice', 'out_refund',))], limit=limit)
+        i = 0
+        for inv in invoices:
+            i += 1
+            template = self.env.ref('account.email_template_edi_invoice', raise_if_not_found=False)
+            # template.attachment_ids = [(5, 0, 0)]
 
+            lang = get_lang(self.env)
+            if template and template.lang:
+                lang = template._render_template(template.lang, 'account.move', inv.id)
+            else:
+                lang = lang.code
+
+            if inv.partner_id and inv.partner_id.email:  # and not i.partner_id.opt_out:
+                attachment_env = self.env['ir.attachment'].sudo()
+                attachment = attachment_env.sudo().search(
+                    [('res_model', '=', 'account.move'),
+                     ('res_id', '=', inv.id),
+                     ('res_field', '=', 'xml_comprobante')], limit=1)
+                email_values = {
+                    'model': 'account.move',  # We don't want to have the mail in the tchatter while in queue!
+                    'res_id': inv.id,
+                    'author_id': self.env.user.partner_id.id, }
+                if attachment:
+                    attachment.name = inv.fname_xml_comprobante
+                    attachment.datas_fname = inv.fname_xml_comprobante
+
+                    attachment_resp = attachment_env.sudo().search(
+                        [('res_model', '=', 'account.move'),
+                         ('res_id', '=', inv.id),
+                         ('res_field', '=', 'xml_respuesta_tributacion')], limit=1)
+                    email_values['attachment_ids'] = [
+                        (0, 0, {'name': inv.fname_xml_comprobante,
+                                'mimetype': 'text/xml',
+                                'datas': attachment.datas}),
+                    ]
+                    if attachment_resp:
+                        attachment_resp.name = inv.fname_xml_respuesta_tributacion
+                        attachment_resp.datas_fname = inv.fname_xml_respuesta_tributacion
+                        # template.attachment_ids = [
+                        #     (6, 0, [attachment.id, attachment_resp.id])]
+                        # # template.email_to = inv.partner_id._get_emails()
+                        email_values['attachment_ids'].append((0, 0, {'name': inv.fname_xml_respuesta_tributacion,
+                                                                      'mimetype': 'text/xml',
+                                                                      'datas': attachment_resp.datas}))
+                        try:
+                            template.send_mail(inv.id, raise_exception=False, force_send=True, email_values=email_values)
+                            _logger.info('%s/%s Correo enviado de la factura ID: %s' % (str(i), str(len(invoices)), str(inv.id)))
+                            pass
+                        except Exception as e:
+                            _logger.error('ERROR cuando intenta enviar correo: %s' % (e,))
+                        inv.date_invoice_sent = fields.Datetime.now()
+            else:
+                _logger.info('%s/%s Falta email en cliente, Factura ID: %s' % (str(i), str(len(invoices)), str(inv.id)))
+                inv.date_invoice_sent = fields.Datetime.now()
+                
     def sent_email(self):
         template = self.env.ref('account.email_template_edi_invoice', raise_if_not_found=False)
         template.attachment_ids = [(5, 0, 0)]
